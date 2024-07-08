@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <form id="city-form">
+        <label for="city">Entrer une ville :</label>
+        <input type="text" id="city" name="city" required>
+        <button type="submit">Météo-moi ça</button>
+    </form>
+
+    <div id="weather-container">
+        <!-- Weather data will be dynamically updated here -->
+    </div>
+
+    <audio id="search-sound" src="/sound.mp3"></audio>
+</div>
+
+<script>
+    const weatherContainer = document.getElementById('weather-container');
+    const socket = new WebSocket('ws://localhost:3000');
+    const searchSound = document.getElementById('search-sound');
+
+    const renderWeatherData = (currentWeather) => {
+        const existingCard = document.getElementById(`weather-${currentWeather.location.name}`);
+
+        const weatherContent = `
+                <h2>${currentWeather.location.name}, ${currentWeather.location.region}, ${currentWeather.location.country}</h2>
+                <p><strong>Température</strong> : ${currentWeather.current.temp_c}°C</p>
+                <p>Condition : ${currentWeather.current.condition.text}</p>
+                <img src="${currentWeather.current.condition.icon}" alt="Weather icon" />
+                <p>Heure locale : ${currentWeather.location.localtime}</p>
+                <div class="weather-info">
+                    <p><strong>Vent :</strong> ${currentWeather.current.wind_kph} km/h ${currentWeather.current.wind_dir}</p>
+                    <p><strong>Précipitation :</strong> ${currentWeather.current.precip_mm} mm</p>
+                    <p><strong>Humidité :</strong> ${currentWeather.current.humidity} %</p>
+                    <p><strong>Nuages :</strong> ${currentWeather.current.cloud} %</p>
+                </div>
+            `;
+
+        if (existingCard) {
+            existingCard.innerHTML = weatherContent;
+        } else {
+            const weatherCard = document.createElement('div');
+            weatherCard.classList.add('weather-card');
+            weatherCard.innerHTML = weatherContent;
+            weatherCard.id = `weather-${currentWeather.location.name}`;
+            weatherContainer.appendChild(weatherCard);
+        }
+    };
+
+    socket.onmessage = (event) => {
+        const weatherData = JSON.parse(event.data);
+        renderWeatherData(weatherData);
+    };
+
+    const cityForm = document.getElementById('city-form');
+    cityForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const cityInput = document.getElementById('city');
+        const city = cityInput.value.trim();
+        if (city) {
+            try {
+                searchSound.play();
+                socket.send(city);
+            } catch (error) {
+                console.error('Error sending city data:', error);
+            }
+            cityInput.value = '';
+        }
+    });
+</script>
+
+</body>
+</html>
