@@ -1,5 +1,3 @@
-# https://github.com/obsidiandynamics/kafdrop/blob/master/docker-compose/kafka-kafdrop/docker-compose.yaml
-
 version: "2"
 services:
   kafdrop:

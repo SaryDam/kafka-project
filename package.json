@@ -1,5 +1,5 @@
 {
-  "name": "kafka-project-chocolatine",
+  "name": "kafka-project",
   "version": "1.0.0",
   "description": "Projet Kafka Metrics",
   "main": "index.js",
@@ -11,7 +11,7 @@
     "start": "tsc && npm run copy-html && concurrently \"node dist/get-weather.js\" \"node dist/server.js\" \"node dist/monitor-weather.js\"",
     "copy-html": "copyfiles -u 1 public/**/* dist/public"
   },
-  "author": "Chocolatine",
+  "author": "SaryDam",
   "license": "ISC",
   "dependencies": {
     "@types/express": "^4.17.21",
