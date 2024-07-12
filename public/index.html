@@ -8,39 +8,64 @@
 <body>
 <div class="container">
     <form id="city-form">
-        <label for="city">Entrer une ville :</label>
-        <input type="text" id="city" name="city" required>
-        <button type="submit">Météo-moi ça</button>
+        <label for="city">Choisir une ville :</label>
+        <select id="city" name="city">
+            <!-- Options seront ajoutées dynamiquement ici -->
+        </select>
+        <button type="submit">Rechercher</button>
     </form>
 
     <div id="weather-container">
-        <!-- Weather data will be dynamically updated here -->
+        <!-- Les données météo seront mises à jour dynamiquement ici -->
     </div>
-
-    <audio id="search-sound" src="/sound.mp3"></audio>
 </div>
 
 <script>
     const weatherContainer = document.getElementById('weather-container');
     const socket = new WebSocket('ws://localhost:3000');
-    const searchSound = document.getElementById('search-sound');
+
+    const cities = [
+        { name: 'Paris' },
+        { name: 'Marseille' },
+        { name: 'Lyon' },
+        { name: 'Nice' },
+        { name: 'Toulouse' },
+        { name: 'Bordeaux' },
+        { name: 'Lille' },
+        { name: 'Strasbourg' },
+        { name: 'Nantes' },
+        { name: 'Montpellier' },
+        // Ajoutez d'autres villes selon vos besoins
+    ];
+
+    const populateCityOptions = () => {
+        const citySelect = document.getElementById('city');
+        cities.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city.name;
+            option.textContent = city.name;
+            citySelect.appendChild(option);
+        });
+    };
+
+    populateCityOptions();
 
     const renderWeatherData = (currentWeather) => {
         const existingCard = document.getElementById(`weather-${currentWeather.location.name}`);
 
         const weatherContent = `
-                <h2>${currentWeather.location.name}, ${currentWeather.location.region}, ${currentWeather.location.country}</h2>
-                <p><strong>Température</strong> : ${currentWeather.current.temp_c}°C</p>
-                <p>Condition : ${currentWeather.current.condition.text}</p>
-                <img src="${currentWeather.current.condition.icon}" alt="Weather icon" />
-                <p>Heure locale : ${currentWeather.location.localtime}</p>
-                <div class="weather-info">
-                    <p><strong>Vent :</strong> ${currentWeather.current.wind_kph} km/h ${currentWeather.current.wind_dir}</p>
-                    <p><strong>Précipitation :</strong> ${currentWeather.current.precip_mm} mm</p>
-                    <p><strong>Humidité :</strong> ${currentWeather.current.humidity} %</p>
-                    <p><strong>Nuages :</strong> ${currentWeather.current.cloud} %</p>
-                </div>
-            `;
+            <h2>${currentWeather.location.name}, ${currentWeather.location.region}, ${currentWeather.location.country}</h2>
+            <p><strong>Température</strong> : ${currentWeather.current.temp_c}°C</p>
+            <p><strong>Condition</strong> : ${currentWeather.current.condition.text}</p>
+            <img src="${currentWeather.current.condition.icon}" alt="Weather icon" />
+            <p>Heure locale : ${currentWeather.location.localtime}</p>
+            <div class="weather-info">
+                <p><strong>Vent :</strong> ${currentWeather.current.wind_kph} km/h</p>
+                <p><strong>Précipitation :</strong> ${currentWeather.current.precip_mm} mm</p>
+                <p><strong>Humidité :</strong> ${currentWeather.current.humidity} %</p>
+                <p><strong>Nuages :</strong> ${currentWeather.current.cloud} %</p>
+            </div>
+        `;
 
         if (existingCard) {
             existingCard.innerHTML = weatherContent;
@@ -52,6 +77,7 @@
             weatherContainer.appendChild(weatherCard);
         }
     };
+
 
     socket.onmessage = (event) => {
         const weatherData = JSON.parse(event.data);
@@ -65,7 +91,6 @@
         const city = cityInput.value.trim();
         if (city) {
             try {
-                searchSound.play();
                 socket.send(city);
             } catch (error) {
                 console.error('Error sending city data:', error);

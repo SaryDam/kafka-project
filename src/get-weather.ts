@@ -10,7 +10,7 @@ export const creerProducer = async (ville: string, kafkaHost: string, kafkaTopic
 
     const producer = new Producer(client, {
         requireAcks: 1,
-        ackTimeoutMs: 100,
+        ackTimeoutMs: 1000,
         partitionerType: 2,
     });
 
